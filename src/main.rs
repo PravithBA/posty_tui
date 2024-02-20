@@ -62,6 +62,13 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State) -> io::Res
 
             if key.modifiers == KeyModifiers::NONE {
                 match state.selected_pane {
+                    Pane::ContentUrl => match key.code {
+                        KeyCode::Char(key) => state.url = format!("{}{}", state.url, key),
+                        KeyCode::Backspace => {
+                            state.url.pop();
+                        }
+                        _ => {}
+                    },
                     Pane::Index => {
                         let len_of_requests = state.requests.len();
                         if key.code == KeyCode::Char('c') {
@@ -79,16 +86,12 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State) -> io::Res
                                 }
                             }
                             if key.code == KeyCode::Char('j') {
-                                if selected_index >= len_of_requests - 1 {
-                                    state.index_list_state.select(Some(0));
-                                } else {
+                                if selected_index < len_of_requests - 1 {
                                     state.index_list_state.select(Some(selected_index + 1));
                                 }
                             }
                             if key.code == KeyCode::Char('k') {
-                                if selected_index == 0 {
-                                    state.index_list_state.select(Some(len_of_requests - 1));
-                                } else {
+                                if selected_index != 0 {
                                     state.index_list_state.select(Some(selected_index - 1));
                                 }
                             }
@@ -97,7 +100,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State) -> io::Res
                                 state.index_list_state.select(Some(0));
                             }
                             if key.code == KeyCode::Char('k') {
-                                state.index_list_state.select(Some(len_of_requests - 1));
+                                state.index_list_state.select(Some(0));
                             }
                         }
                     }
@@ -140,6 +143,32 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State) -> io::Res
                         }
                         Pane::ContentBody => {
                             state.selected_pane = Pane::Index;
+                        }
+                    }
+                }
+            } else {
+                if key.modifiers == KeyModifiers::CONTROL {
+                    if let Some(selected_index) = state.index_list_state.selected() {
+                        let jump_number = 20;
+                        if key.code == KeyCode::Char('u') {
+                            if selected_index > jump_number {
+                                state
+                                    .index_list_state
+                                    .select(Some(selected_index - jump_number))
+                            } else {
+                                state.index_list_state.select(Some(0))
+                            }
+                        }
+                        if key.code == KeyCode::Char('d') {
+                            if selected_index + jump_number < state.requests.len() {
+                                state
+                                    .index_list_state
+                                    .select(Some(selected_index + jump_number))
+                            } else {
+                                state
+                                    .index_list_state
+                                    .select(Some(state.requests.len() - 1))
+                            }
                         }
                     }
                 }

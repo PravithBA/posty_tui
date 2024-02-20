@@ -82,6 +82,8 @@ fn handle_index_area(f: &mut Frame, index_area: Rect, state: &mut State) {
 
     let mut list_items = Vec::<ListItem>::new();
 
+    let vertical_scroll = 0;
+
     for (index, request) in state.requests.iter().enumerate() {
         let style = if state.index_list_state.selected() == Some(index) {
             Style::default().fg(Color::Green)
@@ -89,7 +91,7 @@ fn handle_index_area(f: &mut Frame, index_area: Rect, state: &mut State) {
             Style::default().fg(Color::Yellow)
         };
 
-        let text = format!("{}) {}", index, request);
+        let text = format!("{} {}) {}", vertical_scroll, index, request);
 
         list_items.push(ListItem::new(Line::from(Span::styled(text, style))));
     }
@@ -100,15 +102,7 @@ fn handle_index_area(f: &mut Frame, index_area: Rect, state: &mut State) {
         .begin_symbol(Some("▲"))
         .end_symbol(Some("▼"));
 
-    let vertical_scroll = state.index_list_state.offset();
-
-    let content_length = if state.requests.len() <= 2 {
-        state.requests.len()
-    } else {
-        state.requests.len() - 2
-    };
-
-    let mut scrollbar_state = ScrollbarState::new(content_length).position(vertical_scroll);
+    let mut scrollbar_state = ScrollbarState::new(list.len()).position(vertical_scroll);
 
     f.render_stateful_widget(list.block(block), index_area, &mut state.index_list_state);
 
@@ -117,7 +111,7 @@ fn handle_index_area(f: &mut Frame, index_area: Rect, state: &mut State) {
         index_area.inner(&Margin {
             // using an inner vertical margin of 1 unit makes the scrollbar inside the block
             vertical: 1,
-            horizontal: 1,
+            horizontal: 0,
         }),
         &mut scrollbar_state,
     );
