@@ -100,7 +100,7 @@ fn handle_index_area(f: &mut Frame, index_area: Rect, state: &mut State) {
             Style::default().fg(Color::Yellow)
         };
 
-        let text = format!("{}) {}", index, request);
+        let text = format!("{}) {}", index, request.label);
 
         list_items.push(ListItem::new(Line::from(Span::styled(text, style))));
     }

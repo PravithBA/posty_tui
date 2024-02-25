@@ -1,7 +1,7 @@
 use core::panic;
 use std::{error::Error, io};
 
-use app::{Pane, State};
+use app::{Pane, Request, State};
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers},
     execute,
@@ -72,7 +72,8 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State) -> io::Res
                     Pane::Index => {
                         let len_of_requests = state.requests.len();
                         if key.code == KeyCode::Char('c') {
-                            state.requests.push("asdasd".into());
+                            let request = Request::new("".into());
+                            state.requests.push(request);
                         }
                         if let Some(selected_index) = state.index_list_state.selected() {
                             if key.code == KeyCode::Char('d') {
