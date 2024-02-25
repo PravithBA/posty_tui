@@ -9,7 +9,7 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::{Pane, State};
+use crate::app::{Pane, Popup, State};
 
 pub fn ui(f: &mut Frame, state: &mut State) {
     let main_layout = Layout::default()
@@ -52,6 +52,26 @@ pub fn ui(f: &mut Frame, state: &mut State) {
         ),
         footer_area,
     );
+
+    if let Some(popup) = &state.popup {
+        match popup {
+            Popup::CreateRequest => handle_create_request_popup(f, state),
+        };
+    }
+}
+
+fn handle_create_request_popup(f: &mut Frame, state: &mut State) {
+    let text = if let Some(current_request) = state.get_current_request() {
+        Text::from(current_request.label.clone())
+    } else {
+        Text::from("")
+    };
+    let block = Block::default().borders(Borders::ALL).title("Enter Request Name (Esc - Cancel | Enter - Create)");
+
+    f.render_widget(
+        Paragraph::new(text.alignment(Alignment::Center)).block(block),
+        get_centered_rect_from_length(60, 3, f.size()),
+    )
 }
 
 fn generate_body_area(f: &mut Frame, body_area: Rect, state: &mut State) {
@@ -223,4 +243,24 @@ fn handle_content_body_area(f: &mut Frame, content_body_area: Rect, state: &Stat
             f.render_widget(Block::default().borders(Borders::ALL), content_body_area);
         }
     }
+}
+
+fn get_centered_rect_from_length(length_x: u16, length_y: u16, r: Rect) -> Rect {
+    let popup_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length((r.height - length_y) / 2),
+            Constraint::Length(length_y),
+            Constraint::Length((r.height - length_y) / 2),
+        ])
+        .split(r);
+
+    Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Length((r.width - length_x) / 2),
+            Constraint::Length(length_x),
+            Constraint::Length((r.width - length_x) / 2),
+        ])
+        .split(popup_layout[1])[1] // Return the middle chunk
 }

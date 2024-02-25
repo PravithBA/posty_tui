@@ -117,11 +117,16 @@ impl ToString for Mode {
     }
 }
 
+pub enum Popup {
+    CreateRequest,
+}
+
 pub struct State {
     pub selected_pane: Pane,
     pub requests: Vec<Request>,
     pub index_list_state: ListState,
     pub mode: Mode,
+    pub popup: Option<Popup>,
 }
 
 impl State {
@@ -131,6 +136,7 @@ impl State {
             requests: vec![],
             index_list_state: ListState::default().with_selected(None),
             mode: Mode::Normal,
+            popup: None,
         }
     }
 
@@ -145,6 +151,30 @@ impl State {
         match self.index_list_state.selected() {
             Some(selected_index) => Some(&mut self.requests[selected_index]),
             None => None,
+        }
+    }
+
+    pub fn set_popup(&mut self, popup: Popup) {
+        self.popup = Some(popup);
+    }
+
+    pub fn close_popup(&mut self) {
+        self.popup = None;
+    }
+
+    pub fn remove_selected_request(&mut self) {
+        if let Some(selected_index) = self.index_list_state.selected() {
+            self.remove_request(selected_index)
+        }
+    }
+    pub fn remove_request(&mut self, request_index: usize) {
+        self.requests.remove(request_index);
+        if self.requests.len() == request_index {
+            if request_index != 0 {
+                self.index_list_state.select(Some(request_index - 1));
+            } else {
+                self.index_list_state.select(None)
+            }
         }
     }
 }
