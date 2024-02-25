@@ -66,7 +66,9 @@ fn handle_create_request_popup(f: &mut Frame, state: &mut State) {
     } else {
         Text::from("")
     };
-    let block = Block::default().borders(Borders::ALL).title("Enter Request Name (Esc - Cancel | Enter - Create)");
+    let block = Block::default()
+        .borders(Borders::ALL)
+        .title("Enter Request Name (Esc - Cancel | Enter - Create)");
 
     f.render_widget(
         Paragraph::new(text.alignment(Alignment::Center)).block(block),
