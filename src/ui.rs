@@ -1,9 +1,10 @@
 use ratatui::{
-    layout::{Constraint, Direction, Layout, Margin, Rect},
+    layout::{Alignment, Constraint, Direction, Layout, Margin, Rect},
     style::{Color, Style, Stylize},
     text::{Line, Span, Text},
     widgets::{
         Block, Borders, List, ListItem, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState,
+        Wrap,
     },
     Frame,
 };
@@ -13,7 +14,7 @@ use crate::app::{Pane, State};
 pub fn ui(f: &mut Frame, state: &mut State) {
     let main_layout = Layout::default()
         .constraints([
-            Constraint::Percentage(6),
+            Constraint::Length(3),
             Constraint::Min(0),
             Constraint::Length(3),
         ])
@@ -75,16 +76,24 @@ fn handle_index_area(f: &mut Frame, index_area: Rect, state: &mut State) {
     };
 
     if state.requests.is_empty() {
+        let text =
+            Text::from("Please press 'c' to create a new request!").alignment(Alignment::Center);
+
         let layout = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Percentage(30), Constraint::Min(0)])
+            .constraints([Constraint::Length(13), Constraint::Min(0)])
             .split(index_area);
+
         f.render_widget(
-            Paragraph::new(Text::styled(
-                "    Please press 'c' to create\n         a new request",
-                Style::default(),
-            )),
-            layout[1],
+            Paragraph::new(text).wrap(Wrap::default()),
+            Layout::default()
+                .direction(Direction::Horizontal)
+                .constraints([
+                    Constraint::Length(2),
+                    Constraint::Min(10),
+                    Constraint::Length(2),
+                ])
+                .split(layout[1])[1],
         );
         f.render_widget(block, index_area);
         return;
