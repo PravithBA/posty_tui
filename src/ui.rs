@@ -65,11 +65,7 @@ fn generate_body_area(f: &mut Frame, body_area: Rect, state: &mut State) {
 }
 
 fn handle_index_area(f: &mut Frame, index_area: Rect, state: &mut State) {
-    let title = match state.selected_pane {
-        Pane::Index => format!("{} | Is Active", Pane::Index.to_string()),
-        _ => "Index".into(),
-    };
-
+    let title = "Index";
     let block = match state.selected_pane {
         Pane::Index => Block::default()
             .borders(Borders::ALL)
@@ -77,6 +73,22 @@ fn handle_index_area(f: &mut Frame, index_area: Rect, state: &mut State) {
             .title(title),
         _ => Block::default().borders(Borders::ALL),
     };
+
+    if state.requests.is_empty() {
+        let layout = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([Constraint::Percentage(30), Constraint::Min(0)])
+            .split(index_area);
+        f.render_widget(
+            Paragraph::new(Text::styled(
+                "    Please press 'c' to create\n         a new request",
+                Style::default(),
+            )),
+            layout[1],
+        );
+        f.render_widget(block, index_area);
+        return;
+    }
 
     let mut list_items = Vec::<ListItem>::new();
 
