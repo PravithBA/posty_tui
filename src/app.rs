@@ -177,4 +177,8 @@ impl State {
             }
         }
     }
+
+    pub fn set_mode(&mut self, mode: Mode) {
+        self.mode = mode;
+    }
 }

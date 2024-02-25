@@ -18,11 +18,11 @@ pub fn handle_key(key: KeyEvent, state: &mut State) -> ExitInstruction {
 
 fn handle_key_edit(key: KeyEvent, state: &mut State) -> ExitInstruction {
     if key.code == KeyCode::Esc && key.modifiers == KeyModifiers::NONE {
-        state.mode = Mode::Normal;
+        state.set_mode(Mode::Normal);
         return ExitInstruction::NoExit;
     }
     if key.code == KeyCode::Char('c') && key.modifiers == KeyModifiers::CONTROL {
-        state.mode = Mode::Normal;
+        state.set_mode(Mode::Normal);
         return ExitInstruction::NoExit;
     }
     match state.selected_pane {
@@ -78,12 +78,12 @@ fn handle_key_normal(key: KeyEvent, state: &mut State) -> ExitInstruction {
         match state.selected_pane {
             Pane::ContentUrl => {
                 if key.code == KeyCode::Char('i') && key.modifiers == KeyModifiers::NONE {
-                    state.mode = Mode::Edit;
+                    state.set_mode(Mode::Edit);
                 }
             }
             Pane::ContentMethod => {
                 if key.code == KeyCode::Char('i') && key.modifiers == KeyModifiers::NONE {
-                    state.mode = Mode::Edit;
+                    state.set_mode(Mode::Edit);
                 }
             }
             Pane::Index => {
