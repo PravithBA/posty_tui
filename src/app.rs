@@ -8,7 +8,7 @@ pub enum Pane {
 }
 
 impl Pane {
-    pub fn get_next_pane(&self) -> Pane {
+    pub fn get_next(&self) -> Pane {
         match self {
             Pane::Index => Pane::ContentMethod,
             Pane::ContentMethod => Pane::ContentUrl,
@@ -17,7 +17,7 @@ impl Pane {
         }
     }
 
-    pub fn get_prev_pane(&self) -> Pane {
+    pub fn get_prev(&self) -> Pane {
         match self {
             Pane::Index => Pane::ContentBody,
             Pane::ContentMethod => Pane::Index,
@@ -47,13 +47,22 @@ pub enum RequestMethod {
 }
 
 impl RequestMethod {
-    pub fn get_list() -> Vec<RequestMethod> {
-        vec![
-            RequestMethod::Get,
-            RequestMethod::Post,
-            RequestMethod::Put,
-            RequestMethod::Delete,
-        ]
+    pub fn get_next(&self) -> RequestMethod {
+        match self {
+            RequestMethod::Get => RequestMethod::Post,
+            RequestMethod::Post => RequestMethod::Put,
+            RequestMethod::Put => RequestMethod::Delete,
+            RequestMethod::Delete => RequestMethod::Get,
+        }
+    }
+
+    pub fn get_prev(&self) -> RequestMethod {
+        match self {
+            RequestMethod::Get => RequestMethod::Delete,
+            RequestMethod::Post => RequestMethod::Get,
+            RequestMethod::Put => RequestMethod::Post,
+            RequestMethod::Delete => RequestMethod::Put,
+        }
     }
 }
 
@@ -83,12 +92,21 @@ impl Request {
             url: "".into(),
         }
     }
+
+    pub fn select_to_next_method(&mut self) {
+        self.method = self.method.get_next();
+    }
+
+    pub fn select_to_prev_method(&mut self) {
+        self.method = self.method.get_prev();
+    }
 }
 
 pub struct State {
     pub selected_pane: Pane,
     pub requests: Vec<Request>,
     pub index_list_state: ListState,
+    pub is_editing: bool,
 }
 
 impl State {
@@ -97,14 +115,21 @@ impl State {
             selected_pane: Pane::Index,
             requests: vec![],
             index_list_state: ListState::default().with_selected(None),
+            is_editing: false,
         }
     }
 
     pub fn move_to_next_pane(&mut self) {
-        self.selected_pane = self.selected_pane.get_next_pane();
+        self.selected_pane = self.selected_pane.get_next();
     }
 
     pub fn move_to_prev_pane(&mut self) {
-        self.selected_pane = self.selected_pane.get_prev_pane();
+        self.selected_pane = self.selected_pane.get_prev();
+    }
+    pub fn get_current_request(&mut self) -> Option<&mut Request> {
+        match self.index_list_state.selected() {
+            Some(selected_index) => Some(&mut self.requests[selected_index]),
+            None => None,
+        }
     }
 }
