@@ -62,13 +62,22 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State) -> io::Res
 
             if key.modifiers == KeyModifiers::NONE {
                 match state.selected_pane {
-                    Pane::ContentUrl => match key.code {
-                        KeyCode::Char(key) => state.url = format!("{}{}", state.url, key),
-                        KeyCode::Backspace => {
-                            state.url.pop();
+                    Pane::ContentUrl => {
+                        if let Some(selected_request_index) = state.index_list_state.selected() {
+                            match key.code {
+                                KeyCode::Char(key) => {
+                                    state.requests[selected_request_index].url = format!(
+                                        "{}{}",
+                                        state.requests[selected_request_index].url, key
+                                    );
+                                }
+                                KeyCode::Backspace => {
+                                    state.requests[selected_request_index].url.pop();
+                                }
+                                _ => {}
+                            };
                         }
-                        _ => {}
-                    },
+                    }
                     Pane::Index => {
                         let len_of_requests = state.requests.len();
                         if key.code == KeyCode::Char('c') {
@@ -86,15 +95,13 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State) -> io::Res
                                     }
                                 }
                             }
-                            if key.code == KeyCode::Char('j') {
-                                if selected_index < len_of_requests - 1 {
-                                    state.index_list_state.select(Some(selected_index + 1));
-                                }
+                            if key.code == KeyCode::Char('j')
+                                && selected_index < len_of_requests - 1
+                            {
+                                state.index_list_state.select(Some(selected_index + 1));
                             }
-                            if key.code == KeyCode::Char('k') {
-                                if selected_index != 0 {
-                                    state.index_list_state.select(Some(selected_index - 1));
-                                }
+                            if key.code == KeyCode::Char('k') && selected_index != 0 {
+                                state.index_list_state.select(Some(selected_index - 1));
                             }
                         } else if !state.requests.is_empty() {
                             if key.code == KeyCode::Char('j') {
@@ -109,17 +116,11 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State) -> io::Res
                 }
 
                 if key.code == KeyCode::Char('h') {
-                    match state.selected_pane {
-                        Pane::Index => {
-                            state.selected_pane = Pane::ContentBody;
-                        }
-                        Pane::ContentUrl => {
-                            state.selected_pane = Pane::Index;
-                        }
-                        Pane::ContentBody => {
-                            state.selected_pane = Pane::ContentUrl;
-                        }
-                    }
+                    state.move_to_prev_pane();
+                }
+
+                if key.code == KeyCode::Char('l') {
+                    state.move_to_next_pane()
                 }
 
                 if key.code == KeyCode::Char('i') {
@@ -133,43 +134,27 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State) -> io::Res
                 if key.code == KeyCode::Char('u') {
                     state.selected_pane = Pane::ContentUrl;
                 }
-
-                if key.code == KeyCode::Char('l') {
-                    match state.selected_pane {
-                        Pane::Index => {
-                            state.selected_pane = Pane::ContentUrl;
-                        }
-                        Pane::ContentUrl => {
-                            state.selected_pane = Pane::ContentBody;
-                        }
-                        Pane::ContentBody => {
-                            state.selected_pane = Pane::Index;
+            } else if key.modifiers == KeyModifiers::CONTROL {
+                if let Some(selected_index) = state.index_list_state.selected() {
+                    let jump_number = 20;
+                    if key.code == KeyCode::Char('u') {
+                        if selected_index > jump_number {
+                            state
+                                .index_list_state
+                                .select(Some(selected_index - jump_number))
+                        } else {
+                            state.index_list_state.select(Some(0))
                         }
                     }
-                }
-            } else {
-                if key.modifiers == KeyModifiers::CONTROL {
-                    if let Some(selected_index) = state.index_list_state.selected() {
-                        let jump_number = 20;
-                        if key.code == KeyCode::Char('u') {
-                            if selected_index > jump_number {
-                                state
-                                    .index_list_state
-                                    .select(Some(selected_index - jump_number))
-                            } else {
-                                state.index_list_state.select(Some(0))
-                            }
-                        }
-                        if key.code == KeyCode::Char('d') {
-                            if selected_index + jump_number < state.requests.len() {
-                                state
-                                    .index_list_state
-                                    .select(Some(selected_index + jump_number))
-                            } else {
-                                state
-                                    .index_list_state
-                                    .select(Some(state.requests.len() - 1))
-                            }
+                    if key.code == KeyCode::Char('d') {
+                        if selected_index + jump_number < state.requests.len() {
+                            state
+                                .index_list_state
+                                .select(Some(selected_index + jump_number))
+                        } else {
+                            state
+                                .index_list_state
+                                .select(Some(state.requests.len() - 1))
                         }
                     }
                 }

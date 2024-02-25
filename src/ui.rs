@@ -22,13 +22,7 @@ pub fn ui(f: &mut Frame, state: &mut State) {
     let body_area = main_layout[1];
     let footer_area = main_layout[2];
 
-    let selected_pane_in_string = match state.selected_pane {
-        Pane::Index => "Index",
-        Pane::ContentUrl => "Url",
-        Pane::ContentBody => "Body",
-    };
-
-    let title_content = format!("Posty | {}", selected_pane_in_string);
+    let title_content = format!("Posty | {}", state.selected_pane.to_string());
 
     f.render_widget(
         Paragraph::new(Text::styled(
@@ -68,8 +62,8 @@ fn generate_body_area(f: &mut Frame, body_area: Rect, state: &mut State) {
 
 fn handle_index_area(f: &mut Frame, index_area: Rect, state: &mut State) {
     let title = match state.selected_pane {
-        Pane::Index => "Index | Is Active",
-        _ => "Index",
+        Pane::Index => format!("{} | Is Active", Pane::Index.to_string()),
+        _ => "Index".into(),
     };
 
     let block = match state.selected_pane {
@@ -138,7 +132,19 @@ fn handle_content_area(f: &mut Frame, content_area: Rect, state: &State) {
 }
 
 fn handle_content_url_area(f: &mut Frame, content_url_area: Rect, state: &State) {
-    let title = "Url";
+    let content_layout = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Length(10), Constraint::Min(0)])
+        .split(content_url_area);
+    let content_method_area = content_layout[0];
+    let content_url_text_area = content_layout[1];
+
+    handle_content_url_method_area(f, content_method_area, state);
+    handle_content_url_text_area(f, content_url_text_area, state);
+}
+
+fn handle_content_url_text_area(f: &mut Frame, content_url_text_area: Rect, state: &State) {
+    let title = Pane::ContentUrl.to_string();
     let block = match state.selected_pane {
         Pane::ContentUrl => Block::default()
             .borders(Borders::ALL)
@@ -146,13 +152,34 @@ fn handle_content_url_area(f: &mut Frame, content_url_area: Rect, state: &State)
             .title(title),
         _ => Block::default().borders(Borders::ALL),
     };
+    let text: String = if let Some(selected_request_index) = state.index_list_state.selected() {
+        state.requests[selected_request_index].url.clone()
+    } else {
+        "".into()
+    };
     f.render_widget(
-        Paragraph::new(Text::styled(
-            state.url.clone(),
-            Style::default().fg(Color::Yellow),
-        ))
-        .block(block),
-        content_url_area,
+        Paragraph::new(Text::styled(text, Style::default().fg(Color::Yellow))).block(block),
+        content_url_text_area,
+    );
+}
+
+fn handle_content_url_method_area(f: &mut Frame, content_url_method_area: Rect, state: &State) {
+    let title = Pane::ContentMethod.to_string();
+    let block = match state.selected_pane {
+        Pane::ContentMethod => Block::default()
+            .borders(Borders::ALL)
+            .fg(Color::Green)
+            .title(title),
+        _ => Block::default().borders(Borders::ALL),
+    };
+    let text: String = if let Some(selected_request_index) = state.index_list_state.selected() {
+        state.requests[selected_request_index].method.to_string()
+    } else {
+        "".into()
+    };
+    f.render_widget(
+        Paragraph::new(Text::styled(text, Style::default().fg(Color::Yellow))).block(block),
+        content_url_method_area,
     );
 }
 
@@ -163,7 +190,7 @@ fn handle_content_body_area(f: &mut Frame, content_body_area: Rect, state: &Stat
                 Block::default()
                     .borders(Borders::ALL)
                     .fg(Color::Green)
-                    .title("Body"),
+                    .title(Pane::ContentBody.to_string()),
                 content_body_area,
             );
         }
