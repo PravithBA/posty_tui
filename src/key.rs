@@ -27,18 +27,18 @@ fn handle_key_edit(key: KeyEvent, state: &mut State) -> ExitInstruction {
     }
     match state.selected_pane {
         Pane::ContentUrl => {
-            if let Some(current_request) = state.get_current_request() {
-                current_request.url = modify_text_for_key(&current_request.url, key);
+            if let Some(selected_request) = state.get_selected_request() {
+                selected_request.url = modify_text_for_key(&selected_request.url, key);
             }
         }
         Pane::ContentMethod => {
             if key.modifiers == KeyModifiers::NONE {
-                if let Some(current_request) = state.get_current_request() {
+                if let Some(selected_request) = state.get_selected_request() {
                     if key.code == KeyCode::Char('j') {
-                        current_request.select_to_next_method();
+                        selected_request.select_to_next_method();
                     }
                     if key.code == KeyCode::Char('k') {
-                        current_request.select_to_prev_method();
+                        selected_request.select_to_prev_method();
                     }
                 }
             }
@@ -53,77 +53,88 @@ fn handle_key_normal(key: KeyEvent, state: &mut State) -> ExitInstruction {
         return ExitInstruction::Exit("Successfully exited".into());
     }
 
-    if let Some(popup) = &state.popup {
-        match popup {
-            Popup::CreateRequest => {
-                if let Some(current_request) = state.get_current_request() {
-                    if key.code == KeyCode::Enter
-                        && key.modifiers == KeyModifiers::NONE
-                        && !current_request.label.is_empty()
-                    {
-                        state.close_popup();
-                    } else if key.code == KeyCode::Esc && key.modifiers == KeyModifiers::NONE {
-                        state.remove_selected_request();
-                        state.close_popup();
-                    } else {
-                        current_request.label = modify_text_for_key(&current_request.label, key);
-                    }
-                }
-            }
-        }
+    if state.popup.is_some() {
+        handle_key_popup(key, state);
         return ExitInstruction::NoExit;
     }
 
-    if key.modifiers == KeyModifiers::NONE {
-        match state.selected_pane {
-            Pane::ContentUrl => {
-                if key.code == KeyCode::Char('i') && key.modifiers == KeyModifiers::NONE {
-                    state.set_mode(Mode::Edit);
-                }
+    match state.selected_pane {
+        Pane::ContentUrl => {
+            if key.code == KeyCode::Char('i') && key.modifiers == KeyModifiers::NONE {
+                state.set_mode(Mode::Edit);
             }
-            Pane::ContentMethod => {
-                if key.code == KeyCode::Char('i') && key.modifiers == KeyModifiers::NONE {
-                    state.set_mode(Mode::Edit);
-                }
-            }
-            Pane::Index => {
-                let len_of_requests = state.requests.len();
-                if key.code == KeyCode::Char('c') {
-                    state.set_popup(Popup::CreateRequest);
-                    let request = Request::new("".into());
-                    state.requests.push(request);
-                    state
-                        .index_list_state
-                        .select(Some(state.requests.len() - 1));
-                }
-                if let Some(selected_index) = state.index_list_state.selected() {
-                    if key.code == KeyCode::Char('d') {
-                        state.remove_selected_request();
-                    }
-                    if key.code == KeyCode::Char('j') && selected_index < len_of_requests - 1 {
-                        state.index_list_state.select(Some(selected_index + 1));
-                    }
-                    if key.code == KeyCode::Char('k') && selected_index != 0 {
-                        state.index_list_state.select(Some(selected_index - 1));
-                    }
-                } else if !state.requests.is_empty() {
-                    if key.code == KeyCode::Char('j') {
-                        state.index_list_state.select(Some(0));
-                    }
-                    if key.code == KeyCode::Char('k') {
-                        state.index_list_state.select(Some(0));
-                    }
-                }
-            }
-            _ => {}
         }
+        Pane::ContentMethod => {
+            if key.code == KeyCode::Char('i') && key.modifiers == KeyModifiers::NONE {
+                state.set_mode(Mode::Edit);
+            }
+        }
+        Pane::Index => handle_key_index_normal(key, state),
+        _ => {}
+    }
 
+    if key.modifiers == KeyModifiers::NONE {
         if key.code == KeyCode::Char('h') {
             state.move_to_prev_pane();
         }
 
         if key.code == KeyCode::Char('l') {
             state.move_to_next_pane()
+        }
+    }
+    ExitInstruction::NoExit
+}
+
+fn handle_key_popup(key: KeyEvent, state: &mut State) {
+    if let Some(popup) = &state.popup {
+        match popup {
+            Popup::CreateRequest => {
+                if let Some(selected_request) = state.get_selected_request() {
+                    if key.code == KeyCode::Enter
+                        && key.modifiers == KeyModifiers::NONE
+                        && !selected_request.label.is_empty()
+                    {
+                        state.close_popup();
+                    } else if key.code == KeyCode::Esc && key.modifiers == KeyModifiers::NONE {
+                        state.remove_selected_request();
+                        state.close_popup();
+                    } else {
+                        selected_request.label = modify_text_for_key(&selected_request.label, key);
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn handle_key_index_normal(key: KeyEvent, state: &mut State) {
+    if key.modifiers == KeyModifiers::NONE {
+        let len_of_requests = state.requests.len();
+        if key.code == KeyCode::Char('c') {
+            state.set_popup(Popup::CreateRequest);
+            let request = Request::new("".into());
+            state.requests.push(request);
+            state
+                .index_list_state
+                .select(Some(state.requests.len() - 1));
+        }
+        if let Some(selected_index) = state.index_list_state.selected() {
+            if key.code == KeyCode::Char('d') {
+                state.remove_selected_request();
+            }
+            if key.code == KeyCode::Char('j') && selected_index < len_of_requests - 1 {
+                state.index_list_state.select(Some(selected_index + 1));
+            }
+            if key.code == KeyCode::Char('k') && selected_index != 0 {
+                state.index_list_state.select(Some(selected_index - 1));
+            }
+        } else if !state.requests.is_empty() {
+            if key.code == KeyCode::Char('j') {
+                state.index_list_state.select(Some(0));
+            }
+            if key.code == KeyCode::Char('k') {
+                state.index_list_state.select(Some(0));
+            }
         }
     } else if key.modifiers == KeyModifiers::CONTROL {
         if let Some(selected_index) = state.index_list_state.selected() {
@@ -150,7 +161,6 @@ fn handle_key_normal(key: KeyEvent, state: &mut State) -> ExitInstruction {
             }
         }
     }
-    ExitInstruction::NoExit
 }
 
 fn modify_text_for_key(string: &String, key: KeyEvent) -> String {

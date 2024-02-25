@@ -147,7 +147,7 @@ impl State {
     pub fn move_to_prev_pane(&mut self) {
         self.selected_pane = self.selected_pane.get_prev();
     }
-    pub fn get_current_request(&mut self) -> Option<&mut Request> {
+    pub fn get_selected_request(&mut self) -> Option<&mut Request> {
         match self.index_list_state.selected() {
             Some(selected_index) => Some(&mut self.requests[selected_index]),
             None => None,

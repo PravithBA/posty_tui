@@ -61,8 +61,8 @@ pub fn ui(f: &mut Frame, state: &mut State) {
 }
 
 fn handle_create_request_popup(f: &mut Frame, state: &mut State) {
-    let text = if let Some(current_request) = state.get_current_request() {
-        Text::from(current_request.label.clone())
+    let text = if let Some(selected_request) = state.get_selected_request() {
+        Text::from(selected_request.label.clone())
     } else {
         Text::from("")
     };
