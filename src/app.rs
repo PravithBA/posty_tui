@@ -21,7 +21,7 @@ impl Pane {
         match self {
             Pane::Index => Pane::ContentBody,
             Pane::ContentMethod => Pane::Index,
-            Pane::ContentUrl => Pane::ContentUrl,
+            Pane::ContentUrl => Pane::ContentMethod,
             Pane::ContentBody => Pane::ContentUrl,
         }
     }
