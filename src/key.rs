@@ -4,16 +4,26 @@ use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
 use crate::app::{Pane, State};
 
-pub fn handle_key(key: KeyEvent, state: &mut State) {
+pub enum ExitInstruction {
+    Exit(String),
+    NoExit,
+}
+
+pub fn handle_key(key: KeyEvent, state: &mut State) -> ExitInstruction {
     match state.mode {
         Mode::Edit => handle_key_edit(key, state),
         Mode::Normal => handle_key_normal(key, state),
     }
 }
 
-fn handle_key_edit(key: KeyEvent, state: &mut State) {
+fn handle_key_edit(key: KeyEvent, state: &mut State) -> ExitInstruction {
     if key.code == KeyCode::Esc && key.modifiers == KeyModifiers::NONE {
         state.mode = Mode::Normal;
+        return ExitInstruction::NoExit;
+    }
+    if key.code == KeyCode::Char('c') && key.modifiers == KeyModifiers::CONTROL {
+        state.mode = Mode::Normal;
+        return ExitInstruction::NoExit;
     }
     match state.selected_pane {
         Pane::ContentUrl => {
@@ -42,15 +52,26 @@ fn handle_key_edit(key: KeyEvent, state: &mut State) {
             }
         }
         _ => {}
-    }
+    };
+    ExitInstruction::NoExit
 }
 
-fn handle_key_normal(key: KeyEvent, state: &mut State) {
-    if key.code == KeyCode::Char('i') && key.modifiers == KeyModifiers::NONE {
-        state.mode = Mode::Edit;
+fn handle_key_normal(key: KeyEvent, state: &mut State) -> ExitInstruction {
+    if key.code == KeyCode::Char('c') && key.modifiers == KeyModifiers::CONTROL {
+        return ExitInstruction::Exit("Successfully exited".into());
     }
     if key.modifiers == KeyModifiers::NONE {
         match state.selected_pane {
+            Pane::ContentUrl => {
+                if key.code == KeyCode::Char('i') && key.modifiers == KeyModifiers::NONE {
+                    state.mode = Mode::Edit;
+                }
+            }
+            Pane::ContentMethod => {
+                if key.code == KeyCode::Char('i') && key.modifiers == KeyModifiers::NONE {
+                    state.mode = Mode::Edit;
+                }
+            }
             Pane::Index => {
                 let len_of_requests = state.requests.len();
                 if key.code == KeyCode::Char('c') {
@@ -118,4 +139,5 @@ fn handle_key_normal(key: KeyEvent, state: &mut State) {
             }
         }
     }
+    ExitInstruction::NoExit
 }

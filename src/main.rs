@@ -3,11 +3,11 @@ use std::{error::Error, io};
 
 use app::State;
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers},
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use key::handle_key;
+use key::{handle_key, ExitInstruction};
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     Terminal,
@@ -57,10 +57,10 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State) -> io::Res
                 // Skip events that are not KeyEventKind::Press
                 continue;
             };
-            if key.code == KeyCode::Char('c') && key.modifiers == KeyModifiers::CONTROL {
+            if let ExitInstruction::Exit(exit_message) = handle_key(key, state) {
+                eprintln!("{}", exit_message);
                 return Ok(());
-            }
-            handle_key(key, state)
+            };
         }
     }
 }
