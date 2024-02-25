@@ -21,12 +21,11 @@ pub fn ui(f: &mut Frame, state: &mut State) {
     let title_area = main_layout[0];
     let body_area = main_layout[1];
     let footer_area = main_layout[2];
-    let is_editing_text = if state.is_editing { "Edit" } else { "Normal" };
 
     let title_content = format!(
         "Posty | {} | {}",
         state.selected_pane.to_string(),
-        is_editing_text
+        state.mode.to_string(),
     );
 
     f.render_widget(

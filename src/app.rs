@@ -102,11 +102,26 @@ impl Request {
     }
 }
 
+pub enum Mode {
+    Edit,
+    Normal,
+}
+
+impl ToString for Mode {
+    fn to_string(&self) -> String {
+        match self {
+            Mode::Edit => "Edit",
+            Mode::Normal => "Normal",
+        }
+        .into()
+    }
+}
+
 pub struct State {
     pub selected_pane: Pane,
     pub requests: Vec<Request>,
     pub index_list_state: ListState,
-    pub is_editing: bool,
+    pub mode: Mode,
 }
 
 impl State {
@@ -115,7 +130,7 @@ impl State {
             selected_pane: Pane::Index,
             requests: vec![],
             index_list_state: ListState::default().with_selected(None),
-            is_editing: false,
+            mode: Mode::Normal,
         }
     }
 

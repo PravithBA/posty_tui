@@ -1,20 +1,19 @@
-use crate::app::Request;
+use crate::app::{Mode, Request};
 
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
 use crate::app::{Pane, State};
 
 pub fn handle_key(key: KeyEvent, state: &mut State) {
-    if state.is_editing {
-        handle_key_is_editing(key, state);
-    } else {
-        handle_key_is_not_editing(key, state);
+    match state.mode {
+        Mode::Edit => handle_key_edit(key, state),
+        Mode::Normal => handle_key_normal(key, state),
     }
 }
 
-fn handle_key_is_editing(key: KeyEvent, state: &mut State) {
+fn handle_key_edit(key: KeyEvent, state: &mut State) {
     if key.code == KeyCode::Esc && key.modifiers == KeyModifiers::NONE {
-        state.is_editing = false;
+        state.mode = Mode::Normal;
     }
     match state.selected_pane {
         Pane::ContentUrl => {
@@ -46,9 +45,9 @@ fn handle_key_is_editing(key: KeyEvent, state: &mut State) {
     }
 }
 
-fn handle_key_is_not_editing(key: KeyEvent, state: &mut State) {
+fn handle_key_normal(key: KeyEvent, state: &mut State) {
     if key.code == KeyCode::Char('i') && key.modifiers == KeyModifiers::NONE {
-        state.is_editing = true;
+        state.mode = Mode::Edit;
     }
     if key.modifiers == KeyModifiers::NONE {
         match state.selected_pane {
