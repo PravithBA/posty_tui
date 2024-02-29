@@ -130,7 +130,7 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(requests: Vec<Requests>) -> State {
+    pub fn new(requests: Vec<Request>) -> State {
         State {
             selected_pane: Pane::Index,
             requests,

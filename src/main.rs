@@ -27,7 +27,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
 
     // create app and run it
-    let mut state = State::new();
+    let mut state = State::new(vec![]);
     match run_app(&mut terminal, &mut state) {
         Ok(()) => {
             println!("Exiting")
