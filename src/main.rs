@@ -1,19 +1,20 @@
 use core::panic;
 use std::{error::Error, io};
 
-use app::State;
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use key::{handle_key, ExitInstruction};
+use models::state::State;
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     Terminal,
 };
 
-mod app;
+mod enums;
+mod models;
 mod key;
 mod ui;
 use crate::ui::ui;

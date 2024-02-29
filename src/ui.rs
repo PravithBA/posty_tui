@@ -9,7 +9,10 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::{Pane, Popup, State};
+use crate::{
+    enums::{pane::Pane, popup::Popup},
+    models::state::State,
+};
 
 pub fn ui(f: &mut Frame, state: &mut State) {
     let main_layout = Layout::default()
@@ -264,5 +267,5 @@ fn get_centered_rect_from_length(length_x: u16, length_y: u16, r: Rect) -> Rect 
             Constraint::Length(length_x),
             Constraint::Length((r.width - length_x) / 2),
         ])
-        .split(popup_layout[1])[1] // Return the middle chunk
+        .split(popup_layout[1])[1]
 }
