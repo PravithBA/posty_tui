@@ -133,7 +133,9 @@ fn handle_key_index_normal(key: KeyEvent, state: &mut State) {
                 state.index_list_state.select(Some(0));
             }
             if key.code == KeyCode::Char('k') {
-                state.index_list_state.select(Some(0));
+                state
+                    .index_list_state
+                    .select(Some(state.requests.len() - 1));
             }
         }
     } else if key.modifiers == KeyModifiers::CONTROL {

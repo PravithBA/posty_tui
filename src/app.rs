@@ -130,10 +130,10 @@ pub struct State {
 }
 
 impl State {
-    pub fn new() -> State {
+    pub fn new(requests: Vec<Requests>) -> State {
         State {
             selected_pane: Pane::Index,
-            requests: vec![],
+            requests,
             index_list_state: ListState::default().with_selected(None),
             mode: Mode::Normal,
             popup: None,
