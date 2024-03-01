@@ -1,7 +1,9 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
-use crate::{enums::{mode::Mode, pane::Pane, popup::Popup}, models::{request::Request, state::State}};
-
+use crate::{
+    enums::{mode::Mode, pane::Pane, popup::Popup},
+    models::{request::Request, state::State},
+};
 
 pub enum ExitInstruction {
     Exit(String),
