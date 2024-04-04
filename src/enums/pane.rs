@@ -28,6 +28,9 @@ impl ArrayEnum for Pane {
             Pane::ContentBody => Pane::ContentBodyType,
         }
     }
+    fn get_array_form() -> Vec<Self> {
+        vec![Pane::Index, Pane::ContentBody, Pane::ContentBodyType, Pane::ContentUrl, Pane::ContentUrl]
+    }
 }
 
 impl ToString for Pane {

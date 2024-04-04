@@ -22,4 +22,19 @@ impl ArrayEnum for BodyTypeEnum {
             BodyTypeEnum::None => BodyTypeEnum::Xml,
         }
     }
+
+    fn get_array_form() -> Vec<Self> {
+        vec![BodyTypeEnum::Json, BodyTypeEnum::Xml, BodyTypeEnum::None]
+    }
+}
+
+impl ToString for BodyTypeEnum {
+    fn to_string(&self) -> String {
+        match self {
+            BodyTypeEnum::None => "None",
+            BodyTypeEnum::Json => "JSON",
+            BodyTypeEnum::Xml => "XML",
+        }
+        .into()
+    }
 }

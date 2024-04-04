@@ -1,3 +1,5 @@
+use crate::traits::array_enum::ArrayEnum;
+
 pub enum RequestMethod {
     Get,
     Post,
@@ -5,8 +7,8 @@ pub enum RequestMethod {
     Delete,
 }
 
-impl RequestMethod {
-    pub fn get_next(&self) -> RequestMethod {
+impl ArrayEnum for RequestMethod {
+    fn get_next(&self) -> RequestMethod {
         match self {
             RequestMethod::Get => RequestMethod::Post,
             RequestMethod::Post => RequestMethod::Put,
@@ -15,13 +17,24 @@ impl RequestMethod {
         }
     }
 
-    pub fn get_prev(&self) -> RequestMethod {
+    fn get_prev(&self) -> RequestMethod {
         match self {
             RequestMethod::Get => RequestMethod::Delete,
             RequestMethod::Post => RequestMethod::Get,
             RequestMethod::Put => RequestMethod::Post,
             RequestMethod::Delete => RequestMethod::Put,
         }
+    }
+    fn get_array_form() -> Vec<Self>
+    where
+        Self: std::marker::Sized,
+    {
+        vec![
+            RequestMethod::Get,
+            RequestMethod::Post,
+            RequestMethod::Put,
+            RequestMethod::Delete,
+        ]
     }
 }
 
