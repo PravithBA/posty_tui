@@ -44,6 +44,18 @@ fn handle_key_edit(key: KeyEvent, state: &mut State) -> ExitInstruction {
                 }
             }
         }
+        Pane::ContentBodyType => {
+            if key.modifiers == KeyModifiers::NONE {
+                if let Some(selected_request) = state.get_selected_request() {
+                    if key.code == KeyCode::Char('l') {
+                        selected_request.select_to_next_body_type()
+                    }
+                    if key.code == KeyCode::Char('h') {
+                        selected_request.select_to_prev_body_type()
+                    }
+                }
+            }
+        }
         _ => {}
     };
     ExitInstruction::NoExit
@@ -71,6 +83,11 @@ fn handle_key_normal(key: KeyEvent, state: &mut State) -> ExitInstruction {
             }
         }
         Pane::Index => handle_key_index_normal(key, state),
+        Pane::ContentBodyType => {
+            if key.code == KeyCode::Char('i') && key.modifiers == KeyModifiers::NONE {
+                state.set_mode(Mode::Edit);
+            }
+        }
         _ => {}
     }
 
@@ -165,6 +182,7 @@ fn handle_key_index_normal(key: KeyEvent, state: &mut State) {
         }
     }
 }
+
 
 fn modify_text_for_key(string: &String, key: KeyEvent) -> String {
     let mut string = string.into();

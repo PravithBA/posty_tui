@@ -1,6 +1,6 @@
 use ratatui::widgets::ListState;
 
-use crate::enums::{mode::Mode, pane::Pane, popup::Popup};
+use crate::{enums::{mode::Mode, pane::Pane, popup::Popup}, traits::array_enum::ArrayEnum};
 
 use super::request::Request;
 

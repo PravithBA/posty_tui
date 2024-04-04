@@ -17,6 +17,7 @@ use ui::ui;
 mod enums;
 mod event;
 mod models;
+mod traits;
 mod ui;
 
 fn main() -> Result<(), Box<dyn Error>> {
